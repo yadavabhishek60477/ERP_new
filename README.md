@@ -3,8 +3,9 @@
 College ERP using MERN Stack
 
 # Setup
+
 1. Create a .env file in server folder.
-2. Copy the content of .env.example to the newly created .env file
+2. Copy the content of .env.example to the created .env file
 3. Change the MONGODB_URI to your MongoDB atlas URI
 4. Open a terminal in client folder and run "npm run start"
 5. Open another terminal in server folder and run "npm run start"
@@ -36,7 +37,7 @@ College ERP using MERN Stack
 10. Student can Update profile details, password in profile section
 11. Student can check their attendance, marks and subject list
 12. Error display feature available with form validation
-14. Modern UI
+13. Modern UI
 
 # Features to be added later in the future
 
