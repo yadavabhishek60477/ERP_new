@@ -1,10 +1,10 @@
 // routes/libraryRoutes.js
-const express = require("express");
-const { issueBook, returnBook } = require("../controllers/libraryController");
+import { Router } from 'express';
+import { issueBook, returnBook } from '../controllers/libraryController.js';
 
-const router = express.Router();
+const router = Router();
 
-router.post("/issue/:id", issueBook);
-router.post("/return/:id", returnBook);
+router.post('/issue/:id', issueBook);
+router.post('/return/:id', returnBook);
 
-module.exports = router;
+export default router;

@@ -1,14 +1,14 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const marksSchema = new Schema({
   exam: {
     type: Schema.Types.ObjectId,
-    ref: "test",
+    ref: 'test',
   },
   student: {
     type: Schema.Types.ObjectId,
-    ref: "student",
+    ref: 'student',
   },
   marks: {
     type: Number,
@@ -16,4 +16,5 @@ const marksSchema = new Schema({
   },
 });
 
-export default mongoose.model("marks", marksSchema);
+const Marks = mongoose.model('Marks', marksSchema);
+export default Marks;

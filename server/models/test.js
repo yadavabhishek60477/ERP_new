@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const testSchema = mongoose.Schema({
   test: {
@@ -32,4 +32,5 @@ const testSchema = mongoose.Schema({
   },
 });
 
-export default mongoose.model("test", testSchema);
+const Test = mongoose.model('Test', testSchema);
+export default Test;

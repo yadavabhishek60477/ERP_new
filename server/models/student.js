@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema } = mongoose;
 const studentSchema = new Schema({
   name: {
@@ -24,7 +24,7 @@ const studentSchema = new Schema({
   subjects: [
     {
       type: Schema.Types.ObjectId,
-      ref: "subject",
+      ref: 'subject',
     },
   ],
   username: {
@@ -66,4 +66,5 @@ const studentSchema = new Schema({
   },
 });
 
-export default mongoose.model("student", studentSchema);
+const Student = mongoose.model('Student', studentSchema);
+export default Student;

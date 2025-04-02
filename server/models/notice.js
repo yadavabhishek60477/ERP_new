@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const noticeSchema = mongoose.Schema({
   topic: {
@@ -23,4 +23,5 @@ const noticeSchema = mongoose.Schema({
   },
 });
 
-export default mongoose.model("notice", noticeSchema);
+const Notice = mongoose.model('Notice', noticeSchema);
+export default Notice;

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const departmentSchema = mongoose.Schema({
   department: {
@@ -12,4 +12,5 @@ const departmentSchema = mongoose.Schema({
   },
 });
 
-export default mongoose.model("department", departmentSchema);
+const Department = mongoose.model('Department', departmentSchema);
+export default Department;

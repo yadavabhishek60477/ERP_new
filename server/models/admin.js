@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const adminSchema = mongoose.Schema(
   {
@@ -40,4 +40,5 @@ const adminSchema = mongoose.Schema(
   { strict: false }
 );
 
-export default mongoose.model("admin", adminSchema);
+const Admin = mongoose.model('Admin', adminSchema);
+export default Admin;

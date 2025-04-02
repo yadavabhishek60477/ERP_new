@@ -1,13 +1,13 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema } = mongoose;
 const attendenceSchema = new Schema({
   student: {
     type: Schema.Types.ObjectId,
-    ref: "student",
+    ref: 'student',
   },
   subject: {
     type: Schema.Types.ObjectId,
-    ref: "subject",
+    ref: 'subject',
   },
   totalLecturesByFaculty: {
     type: Number,
@@ -19,4 +19,5 @@ const attendenceSchema = new Schema({
   },
 });
 
-export default mongoose.model("attendance", attendenceSchema);
+const Attendence = mongoose.model('Attendence', attendenceSchema);
+export default Attendence;

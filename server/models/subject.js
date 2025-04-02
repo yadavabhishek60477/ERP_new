@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const { Schema } = mongoose;
 const subjectSchema = new Schema({
   subjectName: {
@@ -24,8 +24,9 @@ const subjectSchema = new Schema({
   },
   attendence: {
     type: Schema.Types.ObjectId,
-    ref: "attendence",
+    ref: 'attendence',
   },
 });
 
-export default mongoose.model("subject", subjectSchema);
+const Subject = mongoose.model('Subject', subjectSchema);
+export default Subject;
