@@ -42,6 +42,15 @@ import DeleteFaculty from './components/admin/deleteFaculty/DeleteFaculty';
 import DeleteStudent from './components/admin/deleteStudent/DeleteStudent';
 import DeleteSubject from './components/admin/deleteSubject/DeleteSubject';
 import CreateNotice from './components/admin/createNotice/CreateNotice';
+// App.js (top of file)
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import Header from './components/Header';
+import Footer from './components/Footer';
+import DeleteSubject from './components/admin/deleteSubject/DeleteSubject';
+import CreateNotice from './components/admin/createNotice/CreateNotice';
+import LibraryManager from './pages/LibraryManager'; // ✅ New Route
+
 // import Login from './pages/Login';
 // import Register from './pages/Register';
 // import Dashboard from './pages/Dashboard';
@@ -231,48 +240,14 @@ const App = () => {
     </Routes>
   );
 };
-
-
-// frontend/pages/LibraryManager.jsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import BookList from '../components/BookList';
-import BookForm from '../components/BookForm';
-
-const LibraryManager = () => {
-  const [books, setBooks] = useState([]);
-  const [editingBook, setEditingBook] = useState(null);
-
-  const fetchBooks = async () => {
-    const { data } = await axios.get('/api/books');
-    setBooks(data);
-  };
-
-  useEffect(() => {
-    fetchBooks();
-  }, []);
-
-  const handleAddOrUpdate = async (book) => {
-    if (book._id) {
-      await axios.put(`/api/books/${book._id}`, book);
-    } else {
-      await axios.post('/api/books', book);
-    }
-    setEditingBook(null);
-    fetchBooks();
-  };
-
-  const handleDelete = async (id) => {
-    await axios.delete(`/api/books/${id}`);
-    fetchBooks();
-  };
-
+function App() {
   return (
-    <div>
-      <BookForm onSubmit={handleAddOrUpdate} editingBook={editingBook} clearEdit={() => setEditingBook(null)} />
-      <BookList books={books} onDelete={handleDelete} onEdit={setEditingBook} />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/library" element={<LibraryManager />} />
+        {/* other routes */}
+      </Routes>
+    </Router>
   );
-};
-
-export default LibraryManager;
+}
+export default App;
