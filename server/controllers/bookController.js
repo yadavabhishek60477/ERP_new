@@ -1,39 +1,31 @@
-import Book from '../models/book.js'; // Fix incorrect import
+// frontend/components/BookList.jsx
+import React from 'react';
 
-export const getAllBooks = async (req, res) => {
-  try {
-    const books = await Book.find();
-    res.json(books);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
-  }
+const BookList = ({ books, onDelete, onEdit }) => {
+  return (
+    <div>
+      <h2>Library Books</h2>
+      <table border="1" cellPadding="8">
+        <thead>
+          <tr>
+            <th>Title</th><th>Author</th><th>ISBN</th><th>Genre</th><th>Available</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {books.map(book => (
+            <tr key={book._id}>
+              <td>{book.title}</td><td>{book.author}</td><td>{book.isbn}</td><td>{book.genre}</td>
+              <td>{book.availability ? 'Yes' : 'No'}</td>
+              <td>
+                <button onClick={() => onEdit(book)}>Edit</button>
+                <button onClick={() => onDelete(book._id)} style={{marginLeft: '10px'}}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
-export const addBook = async (req, res) => {
-  try {
-    const { title, author, isbn, genre } = req.body;
-    const newBook = new Book({ title, author, isbn, genre });
-    await newBook.save();
-    res.json({ message: 'Book added successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Could not add book' });
-  }
-};
-
-export const deleteBook = async (req, res) => {
-  try {
-    await Book.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Book deleted' });
-  } catch (error) {
-    res.status(500).json({ error: 'Could not delete book' });
-  }
-};
-
-export const updateBook = async (req, res) => {
-  try {
-    const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedBook);
-  } catch (error) {
-    res.status(500).json({ error: 'Could not update book' });
-  }
-};
+export default BookList;
