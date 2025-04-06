@@ -42,14 +42,8 @@ import DeleteFaculty from './components/admin/deleteFaculty/DeleteFaculty';
 import DeleteStudent from './components/admin/deleteStudent/DeleteStudent';
 import DeleteSubject from './components/admin/deleteSubject/DeleteSubject';
 import CreateNotice from './components/admin/createNotice/CreateNotice';
-// App.js (top of file)
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import Header from './components/Header';
-import Footer from './components/Footer';
-import DeleteSubject from './components/admin/deleteSubject/DeleteSubject';
-import CreateNotice from './components/admin/createNotice/CreateNotice';
-import LibraryManager from './pages/LibraryManager'; // ✅ New Route
+import LibraryManager from './components/LibraryManager'; // ✅ New Route
 
 // import Login from './pages/Login';
 // import Register from './pages/Register';
@@ -146,7 +140,10 @@ const App = () => {
         path='/admin/allstudent'
         element={<GetStudent />}
       />
-
+      <Route
+        path='/library'
+        element={<LibraryManager />}
+      />
       {/* Faculty  */}
 
       <Route
@@ -228,26 +225,8 @@ const App = () => {
         path='/login'
         element={<Login />}
       />
-      {/* <Route
-        path='/register'
-        element={<Register />}
-      />
-      <Route
-        path='/dashboard'
-        element={<Dashboard />}
-      /> */}
-      {/* BOOKS*/}
     </Routes>
   );
 };
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/library" element={<LibraryManager />} />
-        {/* other routes */}
-      </Routes>
-    </Router>
-  );
-}
+
 export default App;

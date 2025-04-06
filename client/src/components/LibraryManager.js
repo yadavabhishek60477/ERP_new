@@ -1,8 +1,9 @@
 // frontend/pages/LibraryManager.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import BookList from '../components/BookList';
-import BookForm from '../components/BookForm';
+
+import BookForm from './book/BookForm';
+import BookList from './book/BookList';
 
 const LibraryManager = () => {
   const [books, setBooks] = useState([]);
@@ -33,9 +34,17 @@ const LibraryManager = () => {
   };
 
   return (
-    <div>
-      <BookForm onSubmit={handleAddOrUpdate} editingBook={editingBook} clearEdit={() => setEditingBook(null)} />
-      <BookList books={books} onDelete={handleDelete} onEdit={setEditingBook} />
+    <div className='flex h-screen w-full p-4 gap-4'>
+      <BookForm
+        onSubmit={handleAddOrUpdate}
+        editingBook={editingBook}
+        clearEdit={() => setEditingBook(null)}
+      />
+      <BookList
+        books={books}
+        onDelete={handleDelete}
+        onEdit={setEditingBook}
+      />
     </div>
   );
 };

@@ -20,7 +20,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/faculty', facultyRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/users', userRoutes);
-// app.use('/api/books', bookRoutes);
+app.use('/api/books', bookRoutes);
 app.use('/api/library', libraryRoutes);
 
 const PORT = process.env.PORT || 5001;
