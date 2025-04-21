@@ -6,6 +6,8 @@ import Marks from "../models/marks.js";
 import Attendence from "../models/attendance.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import Fee from "../models/fee.js";
+
 
 export const studentLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -173,6 +175,55 @@ export const testResult = async (req, res) => {
     res.status(500).json(error);
   }
 };
+// Register new student
+export const registerStudent = async (req, res) => {
+  try {
+    const existing = await Student.findOne({ email: req.body.email });
+    if (existing) {
+      return res.status(400).json({ error: "Student already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const newStudent = new Student({ ...req.body, password: hashedPassword });
+    await newStudent.save();
+
+    res.status(201).json({ message: "Registration successful", student: newStudent });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+export const submitFee = async (req, res) => {
+  try {
+    const { amount, status = "Pending" } = req.body;
+    const studentId = req.params.id;
+
+    const fee = new Fee({
+      student: studentId,
+      amount,
+      status,
+    });
+    await fee.save();
+
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    student.fees.push(fee._id);
+    await student.save();
+
+    const updatedStudent = await Student.findById(studentId).populate("fees");
+
+    res.status(201).json({
+      message: "Fee submitted and student updated",
+      fee,
+      updatedStudent,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 export const attendance = async (req, res) => {
   try {

@@ -64,6 +64,17 @@ const studentSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  registrationDate: {
+    type: Date,
+    default: Date.now,
+  },
+  fees: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Fee",
+    },
+  ],
+
 });
 
 const Student = mongoose.model('Student', studentSchema);
