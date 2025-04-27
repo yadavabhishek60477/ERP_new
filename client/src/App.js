@@ -221,6 +221,7 @@ const App = () => {
         path='/student/attendance'
         element={<Attendance />}
       />
+      
       <Route
         path='/login'
         element={<Login />}
