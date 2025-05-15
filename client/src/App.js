@@ -32,6 +32,7 @@ import StudentFirstTimePassword from './components/student/profile/update/firstT
 import StudentHome from './components/student/StudentHome';
 import StudentProfile from './components/student/profile/Profile';
 import StudentUpdate from './components/student/profile/update/Update';
+import StudentRegistration from './components/student/registration/registration';
 import StudentPassword from './components/student/profile/update/password/Password';
 import SubjectList from './components/student/subjectList/SubjectList';
 import TestResult from './components/student/testResult/TestResult';
@@ -202,6 +203,10 @@ const App = () => {
         element={<StudentProfile />}
       />
       <Route
+        path='/student/registration'
+        element={<StudentRegistration />}
+      />
+      <Route
         path='/student/update'
         element={<StudentUpdate />}
       />
@@ -221,7 +226,7 @@ const App = () => {
         path='/student/attendance'
         element={<Attendance />}
       />
-      
+
       <Route
         path='/login'
         element={<Login />}
