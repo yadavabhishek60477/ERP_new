@@ -68,14 +68,17 @@ const studentSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  fees: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Fee",
-    },
-  ],
+  // here add fee submission code
+  
+feeDues: [{ // Array of references to outstanding fee obligations for this student
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'StudentFeeDue',
+  }],
+  paymentHistory: [{ // Array of references to all payment transactions made by this student
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Payment',
+  }],
 
-});
-
+}, { timestamps: true });
 const Student = mongoose.model('Student', studentSchema);
 export default Student;

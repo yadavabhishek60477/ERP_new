@@ -6,8 +6,12 @@ import {
   testResult,
   attendance,
   registerStudent,
-  submitFee,
+  // NEW/UPDATED imports for fee management:
+  recordManualFeePayment,
+  getStudentOutstandingFees,
+  getStudentPaymentHistory,
 } from '../controllers/studentController.js';
+
 import auth from '../middleware/auth.js';
 
 const router = Router();

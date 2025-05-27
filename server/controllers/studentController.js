@@ -6,7 +6,9 @@ import Marks from "../models/marks.js";
 import Attendence from "../models/attendance.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import Fee from "../models/fee.js";
+//import Fee from "../models/fee.js";
+import StudentFeeDue from '../models/StudentFeeDue.js'; // NEW: Import StudentFeeDue model
+import Payment from "../models/Payment.js"; // NEW: Import Payment model 
 
 
 export const studentLogin = async (req, res) => {
@@ -192,36 +194,130 @@ export const registerStudent = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-export const submitFee = async (req, res) => {
+export const recordManualFeePayment = async (req, res) => {
   try {
-    const { amount, status = "Pending" } = req.body;
-    const studentId = req.params.id;
+    const { amount, paymentMethod = "Cash", studentFeeDueId } = req.body;
+    const studentId = req.params.id; // Student ID from URL parameter
 
-    const fee = new Fee({
-      student: studentId,
-      amount,
-      status,
-    });
-    await fee.save();
-
-    const student = await Student.findById(studentId);
-    if (!student) {
-      return res.status(404).json({ error: "Student not found" });
+    // --- Input Validation ---
+    if (isNaN(amount) || parseFloat(amount) <= 0) {
+      return res.status(400).json({ error: "Amount must be a positive number." });
+    }
+    if (!studentFeeDueId) {
+        return res.status(400).json({ error: "A specific outstanding fee (studentFeeDueId) must be provided." });
     }
 
-    student.fees.push(fee._id);
-    await student.save();
+    // --- Fetch and Validate Related Documents ---
+    const student = await Student.findById(studentId);
+    // Populate feeStructure to get its name for context/validation messages
+    const studentFeeDue = await StudentFeeDue.findById(studentFeeDueId).populate('feeStructure');
 
-    const updatedStudent = await Student.findById(studentId).populate("fees");
+    if (!student) {
+      return res.status(404).json({ error: "Student not found." });
+    }
+    // Check if the fee due record exists AND belongs to the specified student
+    if (!studentFeeDue || studentFeeDue.student.toString() !== studentId) {
+        return res.status(404).json({ error: "Outstanding fee record not found for this student or does not belong to them." });
+    }
+    // Validate that the amount being paid does not exceed the outstanding balance
+    if (parseFloat(amount) > studentFeeDue.balance) {
+        return res.status(400).json({ error: `Amount exceeds outstanding balance of ₹${studentFeeDue.balance.toFixed(2)} for ${studentFeeDue.feeStructure?.name || 'selected fee'}.` });
+    }
+
+    // --- Create the Payment record for manual submission ---
+    // For manual payments, status is immediately 'Success'
+    const payment = new Payment({
+      student: studentId,
+      studentFeeDue: studentFeeDueId,
+      amount: parseFloat(amount),
+      paymentDate: new Date(), // The date this payment was recorded
+      paymentMethod: paymentMethod,
+      status: "Success",
+      // recordedBy: req.user.id, // Uncomment this line if you track which admin/user recorded it
+    });
+    await payment.save();
+
+    // --- Update the StudentFeeDue record ---
+    studentFeeDue.amountPaid += payment.amount;
+    // Push the payment ID to the payments array of the StudentFeeDue.
+    // Ensure no duplicates if this function was called multiple times for the same payment.
+    if (!studentFeeDue.payments.includes(payment._id)) {
+        studentFeeDue.payments.push(payment._id);
+    }
+    await studentFeeDue.save(); // This will automatically trigger the pre-save hook to update status and balance
+
+    // --- Update the Student's overall payment history ---
+    // Push the payment ID to the student's general paymentHistory array.
+    if (!student.paymentHistory.includes(payment._id)) {
+        student.paymentHistory.push(payment._id);
+        await student.save();
+    }
+
+    // --- Prepare Response ---
+    // Re-fetch the student and fee dues with populated data for the response
+    const updatedStudent = await Student.findById(studentId)
+        .populate({
+            path: 'feeDues', // Populate the feeDues array
+            populate: { path: 'feeStructure' } // And populate the feeStructure within each feeDue
+        })
+        .populate({
+            path: 'paymentHistory', // Populate the paymentHistory array
+            populate: { path: 'studentFeeDue' } // And populate the studentFeeDue within each payment
+        });
 
     res.status(201).json({
-      message: "Fee submitted and student updated",
-      fee,
-      updatedStudent,
+      message: "Manual fee payment recorded and student data updated successfully.",
+      payment: payment, // The newly created payment record
+      student: updatedStudent, // The updated student document with populated data
+      updatedFeeDue: studentFeeDue, // The updated outstanding fee due record
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error recording manual fee payment:", error); // Log the actual error for debugging
+    res.status(500).json({ error: error.message || "Internal server error." });
   }
+};
+
+/**
+ * @desc Get all outstanding/partially paid fees for a specific student
+ * @route GET /api/students/:id/fees/outstanding
+ * @access Private (Student or Admin/Staff)
+ */
+export const getStudentOutstandingFees = async (req, res) => {
+    try {
+        // studentId can come from URL params (for admin lookup) or req.user.id (for student's own view)
+        const studentId = req.params.id; // Assuming the ID is in the URL parameter
+
+        const outstandingFees = await StudentFeeDue.find({
+            student: studentId,
+            status: { $in: ['Outstanding', 'Partially Paid'] } // Find fees that are not fully paid
+        }).populate('feeStructure'); // Populate the fee structure details (like name)
+
+        res.status(200).json({ outstandingFees });
+    } catch (error) {
+        console.error("Error fetching student outstanding fees:", error);
+        res.status(500).json({ error: error.message || "Internal server error." });
+    }
+};
+
+/**
+ * @desc Get all payment history for a specific student
+ * @route GET /api/students/:id/payments/history
+ * @access Private (Student or Admin/Staff)
+ */
+export const getStudentPaymentHistory = async (req, res) => {
+    try {
+        // studentId can come from URL params or req.user.id
+        const studentId = req.params.id;
+
+        const paymentHistory = await Payment.find({ student: studentId })
+            .populate('studentFeeDue') // Populate the linked outstanding fee item
+            .sort({ paymentDate: -1 }); // Sort by latest payments first
+
+        res.status(200).json({ paymentHistory });
+    } catch (error) {
+        console.error("Error fetching student payment history:", error);
+        res.status(500).json({ error: error.message || "Internal server error." });
+    }
 };
 
 
