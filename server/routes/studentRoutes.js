@@ -7,7 +7,7 @@ import {
   attendance,
   registerStudent,
   // NEW/UPDATED imports for fee management:
-  recordManualFeePayment,
+  submitFee,
   getStudentOutstandingFees,
   getStudentPaymentHistory,
 } from '../controllers/studentController.js';

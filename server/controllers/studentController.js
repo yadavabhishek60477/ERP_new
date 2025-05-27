@@ -1,15 +1,14 @@
-import student from "../models/student.js";
-import Test from "../models/test.js";
-import Student from "../models/student.js";
-import Subject from "../models/subject.js";
-import Marks from "../models/marks.js";
-import Attendence from "../models/attendance.js";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import student from '../models/student.js';
+import Test from '../models/test.js';
+import Student from '../models/student.js';
+import Subject from '../models/subject.js';
+import Marks from '../models/marks.js';
+import Attendence from '../models/attendance.js';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 //import Fee from "../models/fee.js";
-import StudentFeeDue from '../models/StudentFeeDue.js'; // NEW: Import StudentFeeDue model
-import Payment from "../models/payment.js"; // NEW: Import Payment model 
-
+import StudentFeeDue from '../models/feedue.js'; // NEW: Import StudentFeeDue model
+import Payment from '../models/payment.js'; // NEW: Import Payment model
 
 export const studentLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -20,12 +19,9 @@ export const studentLogin = async (req, res) => {
       errors.usernameError = "Student doesn't exist.";
       return res.status(404).json(errors);
     }
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingStudent.password
-    );
+    const isPasswordCorrect = await bcrypt.compare(password, existingStudent.password);
     if (!isPasswordCorrect) {
-      errors.passwordError = "Invalid Credentials";
+      errors.passwordError = 'Invalid Credentials';
       return res.status(404).json(errors);
     }
 
@@ -34,8 +30,8 @@ export const studentLogin = async (req, res) => {
         email: existingStudent.email,
         id: existingStudent._id,
       },
-      "sEcReT",
-      { expiresIn: "1h" }
+      'sEcReT',
+      { expiresIn: '1h' }
     );
 
     res.status(200).json({ result: existingStudent, token: token });
@@ -49,8 +45,7 @@ export const updatedPassword = async (req, res) => {
     const { newPassword, confirmPassword, email } = req.body;
     const errors = { mismatchError: String };
     if (newPassword !== confirmPassword) {
-      errors.mismatchError =
-        "Your password and confirmation password do not match";
+      errors.mismatchError = 'Your password and confirmation password do not match';
       return res.status(400).json(errors);
     }
 
@@ -66,7 +61,7 @@ export const updatedPassword = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Password updated successfully",
+      message: 'Password updated successfully',
       response: student,
     });
   } catch (error) {
@@ -148,7 +143,7 @@ export const testResult = async (req, res) => {
     const student = await Student.findOne({ department, year, section });
     const test = await Test.find({ department, year, section });
     if (test.length === 0) {
-      errors.notestError = "No Test Found";
+      errors.notestError = 'No Test Found';
       return res.status(404).json(errors);
     }
     var result = [];
@@ -182,29 +177,31 @@ export const registerStudent = async (req, res) => {
   try {
     const existing = await Student.findOne({ email: req.body.email });
     if (existing) {
-      return res.status(400).json({ error: "Student already exists" });
+      return res.status(400).json({ error: 'Student already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const newStudent = new Student({ ...req.body, password: hashedPassword });
     await newStudent.save();
 
-    res.status(201).json({ message: "Registration successful", student: newStudent });
+    res.status(201).json({ message: 'Registration successful', student: newStudent });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-export const recordManualFeePayment = async (req, res) => {
+export const submitFee = async (req, res) => {
   try {
-    const { amount, paymentMethod = "Cash", studentFeeDueId } = req.body;
+    const { amount, paymentMethod = 'Cash', studentFeeDueId } = req.body;
     const studentId = req.params.id; // Student ID from URL parameter
 
     // --- Input Validation ---
     if (isNaN(amount) || parseFloat(amount) <= 0) {
-      return res.status(400).json({ error: "Amount must be a positive number." });
+      return res.status(400).json({ error: 'Amount must be a positive number.' });
     }
     if (!studentFeeDueId) {
-        return res.status(400).json({ error: "A specific outstanding fee (studentFeeDueId) must be provided." });
+      return res
+        .status(400)
+        .json({ error: 'A specific outstanding fee (studentFeeDueId) must be provided.' });
     }
 
     // --- Fetch and Validate Related Documents ---
@@ -213,15 +210,21 @@ export const recordManualFeePayment = async (req, res) => {
     const studentFeeDue = await StudentFeeDue.findById(studentFeeDueId).populate('feeStructure');
 
     if (!student) {
-      return res.status(404).json({ error: "Student not found." });
+      return res.status(404).json({ error: 'Student not found.' });
     }
     // Check if the fee due record exists AND belongs to the specified student
     if (!studentFeeDue || studentFeeDue.student.toString() !== studentId) {
-        return res.status(404).json({ error: "Outstanding fee record not found for this student or does not belong to them." });
+      return res.status(404).json({
+        error: 'Outstanding fee record not found for this student or does not belong to them.',
+      });
     }
     // Validate that the amount being paid does not exceed the outstanding balance
     if (parseFloat(amount) > studentFeeDue.balance) {
-        return res.status(400).json({ error: `Amount exceeds outstanding balance of ₹${studentFeeDue.balance.toFixed(2)} for ${studentFeeDue.feeStructure?.name || 'selected fee'}.` });
+      return res.status(400).json({
+        error: `Amount exceeds outstanding balance of ₹${studentFeeDue.balance.toFixed(2)} for ${
+          studentFeeDue.feeStructure?.name || 'selected fee'
+        }.`,
+      });
     }
 
     // --- Create the Payment record for manual submission ---
@@ -232,7 +235,7 @@ export const recordManualFeePayment = async (req, res) => {
       amount: parseFloat(amount),
       paymentDate: new Date(), // The date this payment was recorded
       paymentMethod: paymentMethod,
-      status: "Success",
+      status: 'Success',
       // recordedBy: req.user.id, // Uncomment this line if you track which admin/user recorded it
     });
     await payment.save();
@@ -242,38 +245,38 @@ export const recordManualFeePayment = async (req, res) => {
     // Push the payment ID to the payments array of the StudentFeeDue.
     // Ensure no duplicates if this function was called multiple times for the same payment.
     if (!studentFeeDue.payments.includes(payment._id)) {
-        studentFeeDue.payments.push(payment._id);
+      studentFeeDue.payments.push(payment._id);
     }
     await studentFeeDue.save(); // This will automatically trigger the pre-save hook to update status and balance
 
     // --- Update the Student's overall payment history ---
     // Push the payment ID to the student's general paymentHistory array.
     if (!student.paymentHistory.includes(payment._id)) {
-        student.paymentHistory.push(payment._id);
-        await student.save();
+      student.paymentHistory.push(payment._id);
+      await student.save();
     }
 
     // --- Prepare Response ---
     // Re-fetch the student and fee dues with populated data for the response
     const updatedStudent = await Student.findById(studentId)
-        .populate({
-            path: 'feeDues', // Populate the feeDues array
-            populate: { path: 'feeStructure' } // And populate the feeStructure within each feeDue
-        })
-        .populate({
-            path: 'paymentHistory', // Populate the paymentHistory array
-            populate: { path: 'studentFeeDue' } // And populate the studentFeeDue within each payment
-        });
+      .populate({
+        path: 'feeDues', // Populate the feeDues array
+        populate: { path: 'feeStructure' }, // And populate the feeStructure within each feeDue
+      })
+      .populate({
+        path: 'paymentHistory', // Populate the paymentHistory array
+        populate: { path: 'studentFeeDue' }, // And populate the studentFeeDue within each payment
+      });
 
     res.status(201).json({
-      message: "Manual fee payment recorded and student data updated successfully.",
+      message: 'Manual fee payment recorded and student data updated successfully.',
       payment: payment, // The newly created payment record
       student: updatedStudent, // The updated student document with populated data
       updatedFeeDue: studentFeeDue, // The updated outstanding fee due record
     });
   } catch (error) {
-    console.error("Error recording manual fee payment:", error); // Log the actual error for debugging
-    res.status(500).json({ error: error.message || "Internal server error." });
+    console.error('Error recording manual fee payment:', error); // Log the actual error for debugging
+    res.status(500).json({ error: error.message || 'Internal server error.' });
   }
 };
 
@@ -283,20 +286,20 @@ export const recordManualFeePayment = async (req, res) => {
  * @access Private (Student or Admin/Staff)
  */
 export const getStudentOutstandingFees = async (req, res) => {
-    try {
-        // studentId can come from URL params (for admin lookup) or req.user.id (for student's own view)
-        const studentId = req.params.id; // Assuming the ID is in the URL parameter
+  try {
+    // studentId can come from URL params (for admin lookup) or req.user.id (for student's own view)
+    const studentId = req.params.id; // Assuming the ID is in the URL parameter
 
-        const outstandingFees = await StudentFeeDue.find({
-            student: studentId,
-            status: { $in: ['Outstanding', 'Partially Paid'] } // Find fees that are not fully paid
-        }).populate('feeStructure'); // Populate the fee structure details (like name)
+    const outstandingFees = await StudentFeeDue.find({
+      student: studentId,
+      status: { $in: ['Outstanding', 'Partially Paid'] }, // Find fees that are not fully paid
+    }).populate('feeStructure'); // Populate the fee structure details (like name)
 
-        res.status(200).json({ outstandingFees });
-    } catch (error) {
-        console.error("Error fetching student outstanding fees:", error);
-        res.status(500).json({ error: error.message || "Internal server error." });
-    }
+    res.status(200).json({ outstandingFees });
+  } catch (error) {
+    console.error('Error fetching student outstanding fees:', error);
+    res.status(500).json({ error: error.message || 'Internal server error.' });
+  }
 };
 
 /**
@@ -305,21 +308,20 @@ export const getStudentOutstandingFees = async (req, res) => {
  * @access Private (Student or Admin/Staff)
  */
 export const getStudentPaymentHistory = async (req, res) => {
-    try {
-        // studentId can come from URL params or req.user.id
-        const studentId = req.params.id;
+  try {
+    // studentId can come from URL params or req.user.id
+    const studentId = req.params.id;
 
-        const paymentHistory = await Payment.find({ student: studentId })
-            .populate('studentFeeDue') // Populate the linked outstanding fee item
-            .sort({ paymentDate: -1 }); // Sort by latest payments first
+    const paymentHistory = await Payment.find({ student: studentId })
+      .populate('studentFeeDue') // Populate the linked outstanding fee item
+      .sort({ paymentDate: -1 }); // Sort by latest payments first
 
-        res.status(200).json({ paymentHistory });
-    } catch (error) {
-        console.error("Error fetching student payment history:", error);
-        res.status(500).json({ error: error.message || "Internal server error." });
-    }
+    res.status(200).json({ paymentHistory });
+  } catch (error) {
+    console.error('Error fetching student payment history:', error);
+    res.status(500).json({ error: error.message || 'Internal server error.' });
+  }
 };
-
 
 export const attendance = async (req, res) => {
   try {
@@ -329,18 +331,15 @@ export const attendance = async (req, res) => {
 
     const attendence = await Attendence.find({
       student: student._id,
-    }).populate("subject");
+    }).populate('subject');
     if (!attendence) {
-      res.status(400).json({ message: "Attendence not found" });
+      res.status(400).json({ message: 'Attendence not found' });
     }
 
     res.status(200).json({
       result: attendence.map((att) => {
         let res = {};
-        res.percentage = (
-          (att.lectureAttended / att.totalLecturesByFaculty) *
-          100
-        ).toFixed(2);
+        res.percentage = ((att.lectureAttended / att.totalLecturesByFaculty) * 100).toFixed(2);
         res.subjectCode = att.subject.subjectCode;
         res.subjectName = att.subject.subjectName;
         res.attended = att.lectureAttended;
