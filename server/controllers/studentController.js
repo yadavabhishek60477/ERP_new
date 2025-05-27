@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 //import Fee from "../models/fee.js";
 import StudentFeeDue from '../models/StudentFeeDue.js'; // NEW: Import StudentFeeDue model
-import Payment from "../models/Payment.js"; // NEW: Import Payment model 
+import Payment from "../models/payment.js"; // NEW: Import Payment model 
 
 
 export const studentLogin = async (req, res) => {

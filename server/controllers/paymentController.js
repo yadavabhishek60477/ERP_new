@@ -1,9 +1,9 @@
 // server/controllers/paymentController.js
-import Razorpay from '../config/razorpay.js'; // Import your Razorpay instance
-import Student from '../models/Student.js'; // Import Student model
-import StudentFeeDue from '../models/StudentFeeDue.js'; // Import StudentFeeDue model
-import Payment from '../models/Payment.js'; // Import Payment model
-import crypto from 'crypto'; // Node.js built-in module for cryptographic operations (for webhooks)
+import Razorpay from '../config/razorpay.js'; // Imports the default export from server/config/razorpay.js
+import Student from '../models/student.js';     // Imports the default export from server/models/Student.js
+import StudentFeeDue from '../models/StudentFeeDue.js'; // Imports the default export from server/models/StudentFeeDue.js
+import Payment from '../models/payment.js';     // Imports the default export from server/models/Payment.js
+import crypto from 'crypto';                    // Imports the built-in Node.js 'crypto' module
 
 // Helper function to generate a unique order ID for Razorpay
 const generateUniqueOrderId = () => {
