@@ -175,18 +175,19 @@ export const testResult = async (req, res) => {
 // Register new student
 export const registerStudent = async (req, res) => {
   try {
-    const existing = await Student.findOne({ email: req.body.email });
-    if (existing) {
-      return res.status(400).json({ error: 'Student already exists' });
-    }
-
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const newStudent = new Student({ ...req.body, password: hashedPassword });
-    await newStudent.save();
-
-    res.status(201).json({ message: 'Registration successful', student: newStudent });
+    const { email, password } = req.body;
+    const user = await Student.findOne({ email });
+    if (!user) return res.status(400).json({ error: 'User not found' });
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: 'User not Found' });
+    res.status(200).json({
+      success: true,
+      message: 'Registration successful',
+      student: user,
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Login failed' });
   }
 };
 export const submitFee = async (req, res) => {
@@ -294,7 +295,8 @@ export const getStudentOutstandingFees = async (req, res) => {
       student: studentId,
       status: { $in: ['Outstanding', 'Partially Paid'] }, // Find fees that are not fully paid
     }).populate('feeStructure'); // Populate the fee structure details (like name)
-
+    console.log('Outstanding Fees:', outstandingFees);
+    // console.log(res);
     res.status(200).json({ outstandingFees });
   } catch (error) {
     console.error('Error fetching student outstanding fees:', error);

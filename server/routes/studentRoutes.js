@@ -24,5 +24,7 @@ router.post('/attendance', auth, attendance);
 router.post('/register', registerStudent);
 // POST /api/students/:id/fee
 router.post('/:id/fee', submitFee);
+// GET /api/students/:id/fees/outstanding
+router.get('/:id/fees/outstanding', getStudentOutstandingFees);
 
 export default router;

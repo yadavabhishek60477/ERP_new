@@ -45,6 +45,7 @@ import DeleteSubject from './components/admin/deleteSubject/DeleteSubject';
 import CreateNotice from './components/admin/createNotice/CreateNotice';
 
 import LibraryManager from './components/LibraryManager'; // ✅ New Route
+import PaymentWrapper from './components/student/PaymentWrapper'; // ✅ New Route
 
 // import Login from './pages/Login';
 // import Register from './pages/Register';
@@ -205,6 +206,10 @@ const App = () => {
       <Route
         path='/student/registration'
         element={<StudentRegistration />}
+      />
+      <Route
+        path='/payment'
+        element={<PaymentWrapper />}
       />
       <Route
         path='/student/update'

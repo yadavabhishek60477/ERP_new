@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // Ensure axios is installed (npm install axios)
 
-const OnlineFeePayment = ({ studentId, onPaymentSuccess }) => { // studentId is passed from the authenticated user context/prop
+const OnlineFeePayment = ({ studentId, onPaymentSuccess }) => {
+  // studentId is passed from the authenticated user context/prop
   const [outstandingFees, setOutstandingFees] = useState([]);
   const [selectedFeeDueId, setSelectedFeeDueId] = useState('');
   const [amountToPay, setAmountToPay] = useState('');
@@ -13,7 +14,7 @@ const OnlineFeePayment = ({ studentId, onPaymentSuccess }) => { // studentId is 
   // Effect to dynamically load the Razorpay checkout script
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true; // Load script asynchronously
     document.body.appendChild(script);
 
@@ -34,24 +35,25 @@ const OnlineFeePayment = ({ studentId, onPaymentSuccess }) => { // studentId is 
       }
 
       setLoading(true);
-      setError("");
-      setMessage("");
+      setError('');
+      setMessage('');
       try {
         // API call to get outstanding fees for the current student
         // This assumes your backend route is GET /api/students/:id/fees/outstanding
         const res = await axios.get(`/api/students/${studentId}/fees/outstanding`);
+        console.log(res);
         setOutstandingFees(res.data.outstandingFees);
         if (res.data.outstandingFees.length > 0) {
           // Auto-select the first outstanding fee and pre-fill the amount
           setSelectedFeeDueId(res.data.outstandingFees[0]._id);
           setAmountToPay(res.data.outstandingFees[0].balance.toFixed(2));
         } else {
-            setSelectedFeeDueId('');
-            setAmountToPay('');
+          setSelectedFeeDueId('');
+          setAmountToPay('');
         }
       } catch (err) {
-        console.error("Error fetching outstanding fees:", err);
-        setError(err.response?.data?.error || "Failed to load outstanding fees.");
+        console.error('Error fetching outstanding fees:', err);
+        setError(err.response?.data?.error || 'Failed to load outstanding fees.');
       } finally {
         setLoading(false);
       }
@@ -63,7 +65,7 @@ const OnlineFeePayment = ({ studentId, onPaymentSuccess }) => { // studentId is 
   const handleFeeSelection = (e) => {
     const selectedId = e.target.value;
     setSelectedFeeDueId(selectedId);
-    const selectedFee = outstandingFees.find(fee => fee._id === selectedId);
+    const selectedFee = outstandingFees.find((fee) => fee._id === selectedId);
     if (selectedFee) {
       setAmountToPay(selectedFee.balance.toFixed(2)); // Pre-fill with the selected fee's balance
     } else {
@@ -80,7 +82,7 @@ const OnlineFeePayment = ({ studentId, onPaymentSuccess }) => { // studentId is 
 
     // Frontend validation before initiating payment
     if (!selectedFeeDueId || isNaN(amountToPay) || parseFloat(amountToPay) <= 0) {
-      setError("Please select a fee and enter a valid positive amount.");
+      setError('Please select a fee and enter a valid positive amount.');
       setLoading(false);
       return;
     }
@@ -95,7 +97,8 @@ const OnlineFeePayment = ({ studentId, onPaymentSuccess }) => { // studentId is 
       });
 
       // Extract necessary data from the backend response for Razorpay checkout
-      const { razorpayOrderId, amount, currency, keyId, studentName, studentEmail, studentPhone } = response.data;
+      const { razorpayOrderId, amount, currency, keyId, studentName, studentEmail, studentPhone } =
+        response.data;
 
       // 2. Configure Razorpay Checkout options
       const options = {
@@ -119,12 +122,14 @@ const OnlineFeePayment = ({ studentId, onPaymentSuccess }) => { // studentId is 
             // fetchOutstandingFees();
           }, 2000); // Wait 2 seconds for webhook to process
         },
-        prefill: { // Prefill user details in the Razorpay checkout form
+        prefill: {
+          // Prefill user details in the Razorpay checkout form
           name: studentName,
           email: studentEmail,
           contact: studentPhone,
         },
-        notes: { // Custom notes that will be sent to Razorpay (can be seen in dashboard)
+        notes: {
+          // Custom notes that will be sent to Razorpay (can be seen in dashboard)
           studentId: studentId,
           studentFeeDueId: selectedFeeDueId,
         },
@@ -137,68 +142,138 @@ const OnlineFeePayment = ({ studentId, onPaymentSuccess }) => { // studentId is 
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function (response) {
         // This event handler is called if the payment fails (e.g., card declined)
-        setError(response.error?.description || "Payment failed. Please try again.");
-        console.error("Razorpay Payment Failed:", response.error);
+        setError(response.error?.description || 'Payment failed. Please try again.');
+        console.error('Razorpay Payment Failed:', response.error);
         setMessage(''); // Clear success message if any
       });
       rzp.open(); // Open the Razorpay payment modal
-
     } catch (err) {
-      console.error("Error initiating payment from frontend:", err);
+      console.error('Error initiating payment from frontend:', err);
       // Display specific error message from backend if available
-      setError(err.response?.data?.message || "Failed to initiate payment. Please try again.");
+      setError(err.response?.data?.message || 'Failed to initiate payment. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="online-fee-payment-container" style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '8px', maxWidth: '500px', margin: '20px auto' }}>
+    <div
+      className='online-fee-payment-container'
+      style={{
+        padding: '20px',
+        border: '1px solid #ccc',
+        borderRadius: '8px',
+        maxWidth: '500px',
+        margin: '20px auto',
+      }}
+    >
       <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Online Fee Payment</h2>
-      {loading && outstandingFees.length === 0 && <p style={{ textAlign: 'center' }}>Loading outstanding fees...</p>}
-      {message && <p className="success-message" style={{ color: 'green', textAlign: 'center' }}>{message}</p>}
-      {error && <p className="error-message" style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+      {loading && outstandingFees.length === 0 && (
+        <p style={{ textAlign: 'center' }}>Loading outstanding fees...</p>
+      )}
+      {message && (
+        <p
+          className='success-message'
+          style={{ color: 'green', textAlign: 'center' }}
+        >
+          {message}
+        </p>
+      )}
+      {error && (
+        <p
+          className='error-message'
+          style={{ color: 'red', textAlign: 'center' }}
+        >
+          {error}
+        </p>
+      )}
 
       {!loading && outstandingFees.length === 0 && !error && (
-        <p style={{ textAlign: 'center', fontStyle: 'italic' }}>No outstanding fees at the moment. You're all clear!</p>
+        <p style={{ textAlign: 'center', fontStyle: 'italic' }}>
+          No outstanding fees at the moment. You're all clear!
+        </p>
       )}
 
       {!loading && outstandingFees.length > 0 && (
-        <form onSubmit={handlePayNow} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <div className="form-group">
-            <label htmlFor="selectFee" style={{ display: 'block', marginBottom: '5px' }}>Select Fee to Pay:</label>
+        <form
+          onSubmit={handlePayNow}
+          style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}
+        >
+          <div className='form-group'>
+            <label
+              htmlFor='selectFee'
+              style={{ display: 'block', marginBottom: '5px' }}
+            >
+              Select Fee to Pay:
+            </label>
             <select
-              id="selectFee"
+              id='selectFee'
               value={selectedFeeDueId}
               onChange={handleFeeSelection}
               required
-              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+              style={{
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+              }}
             >
-              <option value="">-- Select a fee --</option>
-              {outstandingFees.map(fee => (
-                <option key={fee._id} value={fee._id}>
-                  {fee.feeStructure ? `${fee.feeStructure.name} - Balance: ₹${fee.balance.toFixed(2)}` : `Fee ID: ${fee._id} - Balance: ₹${fee.balance.toFixed(2)}`}
+              <option value=''>-- Select a fee --</option>
+              {outstandingFees.map((fee) => (
+                <option
+                  key={fee._id}
+                  value={fee._id}
+                >
+                  {fee.feeStructure
+                    ? `${fee.feeStructure.name} - Balance: ₹${fee.balance.toFixed(2)}`
+                    : `Fee ID: ${fee._id} - Balance: ₹${fee.balance.toFixed(2)}`}
                   {fee.status === 'Partially Paid' && ' (Partially Paid)'}
                 </option>
               ))}
             </select>
           </div>
-          <div className="form-group">
-            <label htmlFor="amountToPay" style={{ display: 'block', marginBottom: '5px' }}>Amount to Pay (₹):</label>
+          <div className='form-group'>
+            <label
+              htmlFor='amountToPay'
+              style={{ display: 'block', marginBottom: '5px' }}
+            >
+              Amount to Pay (₹):
+            </label>
             <input
-              id="amountToPay"
-              type="number"
+              id='amountToPay'
+              type='number'
               value={amountToPay}
               onChange={(e) => setAmountToPay(e.target.value)}
               required
-              min="0.01"
-              step="0.01"
+              min='0.01'
+              step='0.01'
               // Max value should be the balance of the currently selected outstanding fee
-              max={selectedFeeDueId ? outstandingFees.find(f => f._id === selectedFeeDueId)?.balance : ''}
-              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+              max={
+                selectedFeeDueId
+                  ? outstandingFees.find((f) => f._id === selectedFeeDueId)?.balance
+                  : ''
+              }
+              style={{
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+              }}
             />
           </div>
-          <button type="submit" disabled={loading} style={{ padding: '10px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' }}>
+          <button
+            type='submit'
+            disabled={loading}
+            style={{
+              padding: '10px 15px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontSize: '16px',
+            }}
+          >
             {loading ? 'Processing Payment...' : 'Pay Now'}
           </button>
         </form>

@@ -3,27 +3,31 @@ import React, { useState } from 'react';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { Avatar } from '@mui/material';
 import axios from 'axios';
-
+import { useNavigate } from 'react-router-dom';
 const Body = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    course: '',
   });
   const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post('/api/students/register', formData);
       setMessage(res.data.message);
+      // console.log(res);
+      if (res.data.success) {
+        // console.log(res);
+        navigate('/payment', { state: { studentId: res.data.student._id } });
+      }
     } catch (error) {
-      setMessage(error.response?.data?.error || 'Something went wrong');
+      setMessage(error.response?.data?.error || 'wrong credentials');
     }
   };
 
@@ -73,7 +77,7 @@ const Body = () => {
                 required
                 className='border px-4 py-2 rounded-md focus:outline-none focus:ring'
               />
-              <input
+              {/* <input
                 type='text'
                 name='course'
                 placeholder='Course'
@@ -81,7 +85,7 @@ const Body = () => {
                 onChange={handleChange}
                 required
                 className='border px-4 py-2 rounded-md focus:outline-none focus:ring'
-              />
+              /> */}
               <button
                 type='submit'
                 className='bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition'
